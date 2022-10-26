@@ -2,17 +2,35 @@
 
 namespace Stepanenko3\LogsTool\Http\Middleware;
 
-use Closure;
-use Illuminate\Http\Request;
 use Stepanenko3\LogsTool\LogsTool;
-use Symfony\Component\HttpFoundation\Response;
+use Laravel\Nova\Nova;
 
 class Authorize
 {
-    public function handle(Request $request, Closure $next): Response
+    /**
+     * Handle the incoming request.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \Closure                 $next
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function handle($request, $next)
     {
-        return app(LogsTool::class)->authorize($request)
-            ? $next($request)
-            : abort(403);
+        $tool = collect(Nova::registeredTools())->first([$this, 'matchesTool']);
+
+        return optional($tool)->authorize($request) ? $next($request) : abort(403);
+    }
+
+    /**
+     * Determine whether this tool belongs to the package.
+     *
+     * @param \Laravel\Nova\Tool $tool
+     *
+     * @return bool
+     */
+    public function matchesTool($tool)
+    {
+        return $tool instanceof LogsTool;
     }
 }
