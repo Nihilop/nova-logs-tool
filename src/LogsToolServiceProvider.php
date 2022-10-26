@@ -5,18 +5,28 @@ namespace Stepanenko3\LogsTool;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Stepanenko3\LogsTool\Http\Middleware\Authorize;
+use Laravel\Nova\Events\ServingNova;
 use Laravel\Nova\Nova;
 
 class LogsToolServiceProvider extends ServiceProvider
 {
     /**
-     * Register any application services.
+     * Bootstrap any application services.
      *
      * @return void
      */
-    public function register()
+    public function boot()
     {
-        $this->registerRoutes();
+        $this->app->booted(function () {
+            $this->routes();
+        });
+
+        $this->publishes([__DIR__.'/../config/nova-logs-tool.php' => config_path('nova-logs-tool.php'),
+        ], 'nova-logs-tool-config');
+
+        Nova::serving(function (ServingNova $event) {
+            //
+        });
     }
 
     /**
@@ -24,20 +34,27 @@ class LogsToolServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    protected function registerRoutes()
+    protected function routes()
     {
-        // Register nova routes
-        Nova::router()->group(function ($router) {
-            $path = 'logs';
-            $router->get($path, fn () => inertia('NovaLogs', ['basePath' => $path]));
-        });
-
         if ($this->app->routesAreCached()) {
             return;
         }
 
-        Route::middleware(['nova', Authorize::class])
+        Nova::router(['nova:api', Authorize::class], 'logs-tool')
+            ->group(__DIR__.'/../routes/inertia.php');
+
+        Route::middleware(['nova:api', Authorize::class])
             ->prefix('nova-vendor/stepanenko3/logs-tool')
-            ->group(__DIR__ . '/../routes/api.php');
+            ->group(__DIR__.'/../routes/api.php');
+    }
+
+    /**
+     * Register any application services.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        $this->mergeConfigFrom(__DIR__.'/../config/nova-logs-tool.php', 'nova-logs-tool');
     }
 }
