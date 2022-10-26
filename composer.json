@@ -1,16 +1,16 @@
 {
-    "name": "nihilo/nova-logs-tool",
+    "name": "stepanenko3/nova-logs-tool",
     "description": "A Laravel Nova tool to manage and keep track of each one of your logs files.",
     "keywords": [
         "laravel",
         "nova"
     ],
-    "homepage": "https://github.com/Nihilop/nova-logs-tool",
+    "homepage": "https://github.com/stepanenko3/nova-logs-tool",
     "license": "MIT",
     "authors": [
         {
-            "name": "Nihilo",
-            "email": "contact@nihilo.fr",
+            "name": "Artem Stepanenko",
+            "email": "stpnnk.artem@gmail.com",
             "role": "Developer"
         }
     ],
